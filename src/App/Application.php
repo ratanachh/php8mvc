@@ -10,11 +10,9 @@ class Application
     protected string $filename;
     public Request $request;
     
-    public static Application $app;
 
     public function __construct(string $filename)
     {
-        self::$app = $this;
         $this->filename = $filename;
         $this->init();
     }
@@ -26,8 +24,9 @@ class Application
 
     private function init() : void
     {
+        $this->loadConfig();
         $dir = new Directory($this->filename);
-        $this->request = new Request($dir->getAbsoluteUri());
+        $this->request = new Request($this, $dir->getAbsoluteUri());
     }
     
     public function loadConfig(): void
