@@ -1,0 +1,6 @@
+.idea/
+.vscode/
+.history
+*.lock
+
+vendor/

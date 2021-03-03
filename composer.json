@@ -1,0 +1,23 @@
+{
+    "authors": [
+        {
+            "name": "Ratana CHHORM",
+            "email": "ratana.chhorm@quicksoftteam.com",
+            "homepage": "https://www.quicksoftteam.com",
+            "role": "Developer"
+        }
+    ],
+    "require" : {
+        "php" : ">=8.0",
+        "ext-mbstring": "*",
+        "vlucas/phpdotenv": "^3.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "QuickSoft\\": ["src/", "src/App/"]
+        },
+        "files": [
+            "src/App/Functions.php"
+        ]
+    }
+}
