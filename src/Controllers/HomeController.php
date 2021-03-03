@@ -5,11 +5,14 @@ namespace QuickSoft\Controllers;
 
 use QuickSoft\Controller as ControllerBase;
 use QuickSoft\Route;
+use QuickSoft\HttpMethod\{
+    HttpGet
+};
 
-
+#[Route('/home')]
 class HomeController extends ControllerBase
 {
-    #[Route('/home')]
+    #[HttpGet]
     public function index()
     {
         
