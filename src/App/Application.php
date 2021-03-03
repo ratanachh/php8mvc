@@ -25,12 +25,16 @@ class Application
     private function init() : void
     {
         $this->loadConfig();
-        $dir = new Directory($this->filename);
-        $this->request = new Request($this, $dir->getAbsoluteUri());
+        $this->request = new Request($this);
     }
     
     public function loadConfig(): void
     {
         
+    }
+
+    public function getFileName(): string
+    {
+        return $this->filename;
     }
 }

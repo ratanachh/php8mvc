@@ -3,16 +3,47 @@ declare(strict_types=1);
 
 namespace QuickSoft\File;
 
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+
 class Directory
 {
     protected string $document_root;
     protected string $request_uri;
     protected string $filename;
+    private array $tokenCounts = [];
+    protected RecursiveIteratorIterator $files;
 
     public function __construct(string $filename){
         $this->document_root = str_replace(DS, '/', $_SERVER['DOCUMENT_ROOT']);
         $this->filename = str_replace(DS, '/', $filename);
         $this->request_uri = $_SERVER['REQUEST_URI'];
+    }
+
+    public function scanFiles($path): Directory
+    {
+        $dirIterator = new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS);
+        $this->files = new RecursiveIteratorIterator($dirIterator);
+        return $this;
+    }
+
+    public function getFileCount(): int
+    {
+        return iterator_count($this->files);
+    }
+
+    public function getClassControllerNameArray(): array
+    {
+        $classes = [];
+        foreach ($this->files as $file) {
+            if ($file->getExtension() == 'php') {
+                $classes[] = pathinfo(basename($file->getFilename()), PATHINFO_FILENAME);
+//                $classes[] = str_replace('.php', '', $file->getFilename());
+
+            }
+        };
+        return $classes;
     }
 
     /**

@@ -1,2 +1,2 @@
 <?php
-define('DS', DIRECTORY_SEPARATOR);
+define('APP_PATH', BASE_PATH . DS . 'src');

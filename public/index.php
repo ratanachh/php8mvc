@@ -1,7 +1,8 @@
 <?php
 
 define('BASE_PATH', dirname(__DIR__));
-define('APP_PATH', BASE_PATH . '/src');
+define('DS', DIRECTORY_SEPARATOR);
+
 require_once '../src/App/Autoload.php';
 
 use QuickSoft\Application;
