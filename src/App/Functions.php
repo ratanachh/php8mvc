@@ -7,3 +7,8 @@ function each(&$arr) {
     next($arr);
     return $result;
 }
+
+function trim_to_array(string $value, string $separator = '/') : array
+{
+    return array_values(array_diff(explode($separator, $value), ['']));
+}

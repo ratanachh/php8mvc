@@ -9,7 +9,7 @@ use Attribute;
 class Route
 {
     public function __construct(
-        private string $pattern = ''
+        private string $pattern = '/'
     ){}
 
     /**
@@ -17,6 +17,8 @@ class Route
      */
     public function getPattern(): string
     {
-        return $this->pattern;
+        if (!str_starts_with($this->pattern, '/'))
+            $this->pattern = '/' . $this->pattern;
+        return $this->pattern; 
     }
 }

@@ -7,7 +7,7 @@ use QuickSoft\Controller as ControllerBase;
 use QuickSoft\Route;
 use QuickSoft\HttpMethod\{HttpDelete, HttpGet, HttpPut};
 
-#[Route('/home')]
+#[Route('home')]
 class HomeController extends ControllerBase
 {
     #[HttpGet]
@@ -16,7 +16,7 @@ class HomeController extends ControllerBase
         
     }
 
-    #[HttpPut('/{id}')]
+    #[HttpPut('/{id}/test/{value}')]
     public function index2()
     {
 

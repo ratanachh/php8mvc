@@ -9,6 +9,7 @@ class Application
 {
     protected string $filename;
     public Request $request;
+    public Dispatcher $dispatcher;
     
 
     public function __construct(string $filename)
@@ -25,6 +26,7 @@ class Application
     private function init() : void
     {
         $this->loadConfig();
+        $this->dispatcher = new Dispatcher($this);
         $this->request = new Request($this);
     }
     

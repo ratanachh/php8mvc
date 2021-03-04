@@ -6,7 +6,7 @@ use QuickSoft\Controller as ControllerBase;
 use QuickSoft\HttpMethod\HttpGet;
 use QuickSoft\Route;
 
-#[Route("/homes")]
+#[Route("homes")]
 class DashboardController extends ControllerBase
 {
     #[HttpGet('called')]

@@ -4,7 +4,11 @@ declare(strict_types=1);
 namespace QuickSoft;
 
 use Exception;
-use QuickSoft\Exception\{ConflictClassRouteException, ConflictMethodRouteException};
+use QuickSoft\Exception\{
+    ConflictClassRouteException, 
+    ConflictMethodRouteException,
+    ControllerNotFoundException
+};
 use QuickSoft\File\Directory;
 use QuickSoft\HttpMethod\{
     HttpGet,
@@ -65,10 +69,13 @@ class Request
                 
                 if ($this->has_method) {
                     $matchMethod = $this->matchMethodPattern($matchClass->partUrl);
-                    var_dump($matchMethod);
+                    if ($matchMethod != false) {
+
+                    }
+
                 }
             }
-            else throw new ErrorException('Controller not found.');
+            else throw new ControllerNotFoundException();
         }
         else throw new ErrorException('Does not has any controllers.');
     }
@@ -91,7 +98,7 @@ class Request
     private function matchClassPattern()
     {
         foreach ($this->patternClasses as $pattern) {
-            if (mb_stripos($this->absoluteUri, $pattern->partUrl) !== false) {
+            if (stripos($this->absoluteUri, $pattern->partUrl) !== false) {
                 if (substr($this->absoluteUri, 0, strlen($pattern->partUrl)) == $pattern->partUrl) {
                     $partUrl = substr($this->absoluteUri, strlen($pattern->partUrl));
                     return (object)['class' => $pattern->class, 'partUrl' => $partUrl];
@@ -107,13 +114,31 @@ class Request
             switch ($partUrl) {
                 case $patternMethod->partUrl: return $patternMethod->method;
                 default:
-                    var_dump($partUrl);
-                    var_dump($patternMethod);
-                    break;
+                    if (strpos($patternMethod->partUrl, '{') !== false && strpos($patternMethod->partUrl, '}')) {
+                        $urlArray = trim_to_array($patternMethod->partUrl);
+                        $partUrlArray = trim_to_array($partUrl);
+                        if (count($urlArray) === count($partUrlArray)) {
+                            $matches = [];
+                            $index = 0;
+                            foreach($urlArray as $block) {
+                                if( (strpos($block, '{') !== false && strpos($block, '}') !== false)
+                                    || $block == $partUrlArray[$index]
+                                ) {
+                                    $matches[] = $partUrlArray[$index];
+                                }
+                                $index++;
+                            }
+                            if (count($matches) === count($urlArray))
+                                return (object)['name' => $patternMethod->method, 'params' => $matches];
+                        }
+                    }
+                break;
             }
         }
         return false;
     }
+
+
 
     private function analystMethods(stdClass $matchClass)
     {
