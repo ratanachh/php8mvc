@@ -5,7 +5,7 @@ namespace QuickSoft\HttpMethod;
 
 abstract class Http
 {
-    public function getRoutPath()
+    public function getRoutePath()
     {
         return $this->route;
     }
