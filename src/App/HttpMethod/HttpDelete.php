@@ -9,6 +9,6 @@ use Attribute;
 class HttpDelete extends Http
 {
     public function __construct(
-        public string $route = '/'
+        public string $route = ''
     ){}
 }

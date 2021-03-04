@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace QuickSoft;
 
 use Exception;
+use QuickSoft\Exception\{ConflictClassRouteException, ConflictMethodRouteException};
 use QuickSoft\File\Directory;
 use QuickSoft\HttpMethod\{
     HttpGet,
@@ -63,7 +64,8 @@ class Request
                 $this->analystMethods($matchClass);
                 
                 if ($this->has_method) {
-                    var_dump($this->patternMethods);
+                    $matchMethod = $this->matchMethodPattern($matchClass->partUrl);
+                    var_dump($matchMethod);
                 }
             }
             else throw new ErrorException('Controller not found.');
@@ -78,16 +80,20 @@ class Request
             $this->has_controller = true;
             $className = $attributesClass[0]->newInstance();
             $pattern = $className->getPattern();
-            $this->patternClasses[] = (object)['class' => $reflectionClass, 'value'=>$pattern];
+            if (array_key_exists($pattern, $this->patternClasses)) {
+                throw new ConflictClassRouteException($pattern);
+            } else {
+                $this->patternClasses[$pattern] = (object)['class' => $reflectionClass, 'partUrl'=>$pattern];
+            }
         }
     }
     
     private function matchClassPattern()
     {
         foreach ($this->patternClasses as $pattern) {
-            if (mb_stripos($this->absoluteUri, $pattern->value) !== false) {
-                if (substr($this->absoluteUri, 0, strlen($pattern->value)) == $pattern->value) {
-                    $partUrl = substr($this->absoluteUri, strlen($pattern->value));
+            if (mb_stripos($this->absoluteUri, $pattern->partUrl) !== false) {
+                if (substr($this->absoluteUri, 0, strlen($pattern->partUrl)) == $pattern->partUrl) {
+                    $partUrl = substr($this->absoluteUri, strlen($pattern->partUrl));
                     return (object)['class' => $pattern->class, 'partUrl' => $partUrl];
                 }
             }
@@ -95,9 +101,18 @@ class Request
         return false;
     }
     
-    private function matchMethodPattern()
+    private function matchMethodPattern($partUrl)
     {
-        
+        foreach ($this->patternMethods as $patternMethod) {
+            switch ($partUrl) {
+                case $patternMethod->partUrl: return $patternMethod->method;
+                default:
+                    var_dump($partUrl);
+                    var_dump($patternMethod);
+                    break;
+            }
+        }
+        return false;
     }
 
     private function analystMethods(stdClass $matchClass)
@@ -116,11 +131,10 @@ class Request
                 foreach ($attributes as $attribute) {
                     $methodName = $attribute->newInstance();
                     $pattern = $methodName->getRoutePath();
-                    
-                    if (isset($this->patternMethods[$pattern])) {
-                        
+                    if (array_key_exists($pattern, $this->patternMethods)) {
+                            throw new ConflictMethodRouteException($method->class, $method->name, $pattern);
                     } else {
-                        $this->patternMethods[$pattern] = (object)['class' => $reflectionClass, 'value'=>$pattern];
+                        $this->patternMethods[$pattern] = (object)['method' => $method->name, 'partUrl'=>$pattern];
                     }
 
                 }

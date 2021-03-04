@@ -9,7 +9,7 @@ use Attribute;
 class HttpPost extends Http
 {
     public function __construct(
-        public string $route = '/'
+        public string $route = ''
     ){}
 
 }

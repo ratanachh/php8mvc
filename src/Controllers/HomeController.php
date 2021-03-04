@@ -16,7 +16,7 @@ class HomeController extends ControllerBase
         
     }
 
-    #[HttpPut]
+    #[HttpPut('/{id}')]
     public function index2()
     {
 
