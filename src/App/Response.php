@@ -29,6 +29,4 @@ class Response
         $this->content = $content;
     }
     
-    
-    
 }

@@ -49,7 +49,7 @@ class Config implements \ArrayAccess, \Countable
     }
 
     public function offsetSet($offset, $value) {
-        if (is_null($offset)) throw new \Exception("Can't Assign member as null to class Core\Config.", 1);
+        if (is_null($offset)) throw new \Exception("Can't Assign member as null to class QuickSoft\Config.", 1);
         $this->$offset = $value;
     }
 

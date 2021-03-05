@@ -3,32 +3,27 @@ declare(strict_types=1);
 
 namespace QuickSoft;
 
-use Exception;
-use QuickSoft\Exception\{
-    ConflictClassRouteException, 
+use QuickSoft\Exception\{ConflictClassRouteException,
     ConflictMethodRouteException,
-    ControllerNotFoundException
-};
-use QuickSoft\File\Directory;
+    ControllerNotFoundException,
+    MethodNotFoundException};
 use QuickSoft\HttpMethod\{
+    Http,
     HttpGet,
     HttpDelete,
     HttpPost,
     HttpPut
 };
+use QuickSoft\File\Directory;
 use ReflectionAttribute;
 use ReflectionClass;
 use ErrorException;
+use Exception;
 use stdClass;
 
 class Request
 {
-    const GET = 'GET';
-    const POST = 'POST';
-    const PUT = 'PUT';
-    const DELETE = 'DELETE';
     
-    private Response $response;
     private Application $application;
     private string $absoluteUri;
     private bool $has_controller;
@@ -44,7 +39,6 @@ class Request
 
     private function init()
     {
-        $this->response = new Response();
         $dir = new Directory($this->application->getFileName());
         $this->absoluteUri = $dir->getAbsoluteUri();
         $this->resolveClasses($dir->scanFiles(APP_PATH . DS . 'Controllers')->getClassControllerNameArray());
@@ -66,13 +60,17 @@ class Request
             $matchClass = $this->matchClassPattern();
             if ($matchClass != false) {
                 $this->analystMethods($matchClass);
-                
                 if ($this->has_method) {
                     $matchMethod = $this->matchMethodPattern($matchClass->partUrl);
                     if ($matchMethod != false) {
-
+                        $dispatcher = (object)[
+                            'class' => $matchClass->class->name,
+                            'method' => $matchMethod->name,
+                            'params' => $matchMethod->params
+                        ];
+                        $this->application->dispatcher->setDispatcher($dispatcher, $this->application->response);
                     }
-
+                    else throw new MethodNotFoundException(); 
                 }
             }
             else throw new ControllerNotFoundException();
@@ -108,27 +106,25 @@ class Request
         return false;
     }
     
-    private function matchMethodPattern($partUrl)
+    private function matchMethodPattern($partUrl): object|bool|string
     {
         foreach ($this->patternMethods as $patternMethod) {
             switch ($partUrl) {
                 case $patternMethod->partUrl: return $patternMethod->method;
                 default:
-                    if (strpos($patternMethod->partUrl, '{') !== false && strpos($patternMethod->partUrl, '}')) {
+                    if (str_contains($patternMethod->partUrl, '{') && str_contains($patternMethod->partUrl, '}')) {
                         $urlArray = trim_to_array($patternMethod->partUrl);
                         $partUrlArray = trim_to_array($partUrl);
                         if (count($urlArray) === count($partUrlArray)) {
                             $matches = [];
                             $index = 0;
                             foreach($urlArray as $block) {
-                                if( (strpos($block, '{') !== false && strpos($block, '}') !== false)
-                                    || $block == $partUrlArray[$index]
-                                ) {
+                                if((str_contains($block, '{') && str_contains($block, '}'))) {
                                     $matches[] = $partUrlArray[$index];
                                 }
                                 $index++;
                             }
-                            if (count($matches) === count($urlArray))
+                            if (count($matches) > 0)
                                 return (object)['name' => $patternMethod->method, 'params' => $matches];
                         }
                     }
@@ -146,10 +142,10 @@ class Request
         $this->has_method = false;
         foreach ($reflectionClass->getMethods() as $method) {
             $attributes = match ($this->getMethod()) {
-                self::GET => $method->getAttributes(HttpGet::class, ReflectionAttribute::IS_INSTANCEOF),
-                self::POST => $method->getAttributes(HttpPost::class, ReflectionAttribute::IS_INSTANCEOF),
-                self::PUT => $method->getAttributes(HttpPut::class, ReflectionAttribute::IS_INSTANCEOF),
-                self::DELETE => $method->getAttributes(HttpDelete::class, ReflectionAttribute::IS_INSTANCEOF),
+                Http::GET => $method->getAttributes(HttpGet::class, ReflectionAttribute::IS_INSTANCEOF),
+                Http::POST => $method->getAttributes(HttpPost::class, ReflectionAttribute::IS_INSTANCEOF),
+                Http::PUT => $method->getAttributes(HttpPut::class, ReflectionAttribute::IS_INSTANCEOF),
+                Http::DELETE => $method->getAttributes(HttpDelete::class, ReflectionAttribute::IS_INSTANCEOF),
             };
             if (count($attributes) > 0) {
                 $this->has_method = true;
@@ -215,22 +211,22 @@ class Request
     
     public function isPost()
     {
-        return $this->getMethod() == self::POST;
+        return $this->getMethod() == Http::POST;
     }
 
     public function isGet()
     {
-        return $this->getMethod() == self::GET;
+        return $this->getMethod() == Http::GET;
     }
 
     public function isPut()
     {
-        return $this->getMethod() == self::PUT;
+        return $this->getMethod() == Http::PUT;
     }
 
     public function isDelete()
     {
-        return $this->getMethod() == self::DELETE;
+        return $this->getMethod() == Http::DELETE;
     }
 
 }

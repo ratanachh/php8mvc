@@ -17,9 +17,11 @@ class HomeController extends ControllerBase
     }
 
     #[HttpPut('/{id}/test/{value}')]
-    public function index2()
+    public function index2($id, $value)
     {
-
+        var_dump($id);
+        var_dump($value);
+        $this->response->setContent('hello');
     }
 
     #[HttpPut]
