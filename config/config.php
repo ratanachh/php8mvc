@@ -37,6 +37,6 @@ return [
         'logLevel' => Logger::DEBUG,
         'filename' => 'application.log',
     ],
-    // Set to false to disable sending emails (for use in test environment)
+    // Set to false to disable sending emails (for use in tests environment)
     'useMail'     => true,
 ];

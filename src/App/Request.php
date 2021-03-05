@@ -62,7 +62,7 @@ class Request
                 $this->analystMethods($matchClass);
                 if ($this->has_method) {
                     $matchMethod = $this->matchMethodPattern($matchClass->partUrl);
-                    if ($matchMethod != false) {
+                    if ($matchMethod !== false) {
                         $dispatcher = (object)[
                             'class' => $matchClass->class->name,
                             'method' => $matchMethod->name,
@@ -110,7 +110,7 @@ class Request
     {
         foreach ($this->patternMethods as $patternMethod) {
             switch ($partUrl) {
-                case $patternMethod->partUrl: return $patternMethod->method;
+                case $patternMethod->partUrl: return (object)['name' => $patternMethod->method, 'params' => []];
                 default:
                     if (str_contains($patternMethod->partUrl, '{') && str_contains($patternMethod->partUrl, '}')) {
                         $urlArray = trim_to_array($patternMethod->partUrl);

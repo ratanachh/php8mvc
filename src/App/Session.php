@@ -11,12 +11,14 @@ class Session
 
     // The state of the session
     private bool $sessionState = self::SESSION_NOT_STARTED;
+    private string $applicationId;
 
     // THE only instance of the class
     private static Session $instance;
 
-
-    private function __construct() {}
+    private function __construct() {
+        $this->applicationId = (string)getenv('APP_GUID');
+    }
 
 
     /**
@@ -33,9 +35,15 @@ class Session
             self::$instance = new self;
         }
 
-        self::$instance->startSession();
+        if (!self::$instance->isStarted())
+            self::$instance->startSession();
 
         return self::$instance;
+    }
+
+    private function isStarted()
+    {
+        return session_status() === PHP_SESSION_ACTIVE || session_status() === PHP_SESSION_NONE;
     }
 
 
@@ -67,7 +75,7 @@ class Session
 
     public function __set( $name , $value )
     {
-        $_SESSION[$name] = $value;
+        $_SESSION[$this->applicationId][$name] = $value;
     }
 
 
@@ -81,22 +89,22 @@ class Session
 
     public function __get(string $name)
     {
-        if ( isset($_SESSION[$name]))
+        if ( isset($_SESSION[$this->applicationId][$name]))
         {
-            return $_SESSION[$name];
+            return $_SESSION[$this->applicationId][$name];
         }
     }
 
 
     public function __isset( $name ): bool
     {
-        return isset($_SESSION[$name]);
+        return isset($_SESSION[$this->applicationId][$name]);
     }
 
 
     public function __unset( $name )
     {
-        unset( $_SESSION[$name] );
+        unset( $_SESSION[$this->applicationId][$name] );
     }
 
 
@@ -111,7 +119,7 @@ class Session
         if ( $this->sessionState == self::SESSION_STARTED )
         {
             $this->sessionState = !session_destroy();
-            unset( $_SESSION );
+            unset( $_SESSION[$this->applicationId] );
 
             return !$this->sessionState;
         }

@@ -16,7 +16,7 @@ class HomeController extends ControllerBase
         
     }
 
-    #[HttpPut('/{id}/test/{value}')]
+    #[HttpPut('/{id}/tests/{value}')]
     public function index2($id, $value)
     {
         var_dump($id);
